@@ -31,7 +31,11 @@ services:
 ##      - ./elasticsearch:/usr/share/elasticsearch/data
 
   web:
-    build: .
+    build:
+      context: .
+      args:
+        - UID=$UID
+        - GID=$GID
     image: tootsuite/mastodon
     restart: always
     env_file: .env.production
@@ -51,7 +55,11 @@ services:
       - ./public/system:/mastodon/public/system
 
   streaming:
-    build: .
+    build:
+      context: .
+      args:
+        - UID=$UID
+        - GID=$GID
     image: tootsuite/mastodon
     restart: always
     env_file: .env.production
@@ -66,7 +74,11 @@ services:
       - redis
 
   sidekiq:
-    build: .
+    build:
+      context: .
+      args:
+        - UID=$UID
+        - GID=$GID
     image: tootsuite/mastodon
     restart: always
     env_file: .env.production
