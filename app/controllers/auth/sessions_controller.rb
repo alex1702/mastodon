@@ -6,9 +6,11 @@ class Auth::SessionsController < Devise::SessionsController
   layout 'auth'
 
   skip_before_action :require_no_authentication, only: [:create]
-  skip_before_action :check_suspension, only: [:destroy]
+  skip_before_action :check_user_permissions, only: [:destroy]
   prepend_before_action :authenticate_with_two_factor, if: :two_factor_enabled?, only: [:create]
   before_action :set_instance_presenter, only: [:new]
+  before_action :set_body_classes
+  after_action :clear_site_data, only: [:destroy]
 
   def new
     Devise.omniauth_configs.each do |provider, config|
@@ -109,11 +111,21 @@ class Auth::SessionsController < Devise::SessionsController
     @instance_presenter = InstancePresenter.new
   end
 
+  def set_body_classes
+    @body_classes = 'lighter'
+  end
+
   def home_paths(resource)
     paths = [about_path]
     if single_user_mode? && resource.is_a?(User)
       paths << short_account_path(username: resource.account)
     end
     paths
+  end
+
+  def clear_site_data
+    # Should be '"*"' but that doen't work in Chrome (neither does '"executionContexts"')
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data
+    response.headers['Clear-Site-Data'] = '"cache", "cookies", "storage"'
   end
 end
